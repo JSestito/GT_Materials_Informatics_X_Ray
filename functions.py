@@ -41,6 +41,3 @@ def scaling(data, feature_range=(0,1)):
     scaleFactor = data/scaled
     return scaled
 
-
-def atr(data,name,image)
-    return dset.attrs[name][image]

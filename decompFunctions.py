@@ -75,8 +75,10 @@ def doPCA(data, nComponents, xvals = [], xlabel = '', **kwargs):
     eigenVals = pca.fit_transform(data)
     comps = pca.components_
     size = int(np.sqrt(comps.shape[-1]))
+    print comps.shape
+    print size
     pltData = comps.reshape(-1,size,size)
-    varRatio = pca.explained_variance_ratio
+    varRatio = pca.explained_variance_ratio_
     fig, axes = plt.subplots(nComponents/2,2+nComponents%2, figsize = (12,12))
     fig.subplots_adjust(wspace=0.1, hspace=0.1,bottom = 0., top=0.5)
 #     fig.subplots_adjust(left=-0.01, bottom=-0.01, right=0.01, top=0.01,
@@ -90,6 +92,8 @@ def doPCA(data, nComponents, xvals = [], xlabel = '', **kwargs):
     fig.subplots_adjust(hspace=0.3)
     for ax, nComp, ratio in zip(axes.flat, np.arange(nComponents), varRatio):
         if len(xvals) is not 0:
+            print np.size(xvals)
+            print np.size(eigenVals[:,nComp])
             ax.plot(xvals, eigenVals[:,nComp],marker='o',markerfacecolor='r')
         else:
             ax.plot(eigenVals[:,nComp],marker='o',markerfacecolor='r')
