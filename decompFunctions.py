@@ -5,13 +5,9 @@ from sklearn.cluster import KMeans, DBSCAN,MiniBatchKMeans
 import numpy as np
 import matplotlib.pyplot as plt
 
-def preping(dataList, logscaling = False, feature_scaling = False, **kwargs):
-    data = np.array([data for data in dataList])
-    qsize = sum([l.shape[0] for l in dataList])
-    xsize, ysize = dataList[0].shape[1], dataList[0].shape[-1]
-    data = data.reshape(qsize, ysize, xsize)
-#     logData = np.log10(data)
-    #logData = data
+def preping(data, logscaling = False, feature_scaling = False, **kwargs):
+    qsize = data.shape[0]
+    xsize, ysize = data.shape[1],data.shape[-1]
     if logscaling:
         Data = np.log(data)
     else:
@@ -75,8 +71,6 @@ def doPCA(data, nComponents, xvals = [], xlabel = '', **kwargs):
     eigenVals = pca.fit_transform(data)
     comps = pca.components_
     size = int(np.sqrt(comps.shape[-1]))
-    print comps.shape
-    print size
     pltData = comps.reshape(-1,size,size)
     varRatio = pca.explained_variance_ratio_
     fig, axes = plt.subplots(nComponents/2,2+nComponents%2, figsize = (12,12))
@@ -92,9 +86,7 @@ def doPCA(data, nComponents, xvals = [], xlabel = '', **kwargs):
     fig.subplots_adjust(hspace=0.3)
     for ax, nComp, ratio in zip(axes.flat, np.arange(nComponents), varRatio):
         if len(xvals) is not 0:
-            print np.size(xvals)
-            print np.size(eigenVals[:,nComp])
-            ax.plot(xvals, eigenVals[:,nComp],marker='o',markerfacecolor='r')
+            ax.plot(xvals[:], eigenVals[:,nComp],marker='o',markerfacecolor='r')
         else:
             ax.plot(eigenVals[:,nComp],marker='o',markerfacecolor='r')
         label = 'Component = %d, Exp. Var. Ratio = %2.3f  ' %(nComp+1, ratio)
