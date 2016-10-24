@@ -86,9 +86,9 @@ def doPCA(data, nComponents, xvals = [], xlabel = '', **kwargs):
     fig.subplots_adjust(hspace=0.3)
     for ax, nComp, ratio in zip(axes.flat, np.arange(nComponents), varRatio):
         if len(xvals) is not 0:
-            ax.plot(xvals[:], eigenVals[:,nComp],marker='o',markerfacecolor='r')
+            ax.plot(xvals[:], eigenVals[:,nComp],'ro')
         else:
-            ax.plot(eigenVals[:,nComp],marker='o',markerfacecolor='r')
+            ax.plot(eigenVals[:,nComp],'ro')
         label = 'Component = %d, Exp. Var. Ratio = %2.3f  ' %(nComp+1, ratio)
         ax.set_title(label)
         ax.set_xlabel(xlabel)
@@ -134,9 +134,9 @@ def doNMF(data, nComponents,  xvals = [], xlabel='', **kwargs):
     encod = dat.T
     for ax, enc,nComp in zip(axes.flat, encod,np.arange(nComponents)):
         if len(xvals) is not 0:
-            ax.plot(xvals, enc,marker='o',markerfacecolor='r')
+            ax.plot(xvals, enc,'ro')
         else:
-            ax.plot(enc,marker='o',markerfacecolor='r')
+            ax.plot(enc,'ro')
         label = 'Component = %d' %(nComp+1)
         ax.set_title(label)  
         ax.set_xlabel(xlabel)
