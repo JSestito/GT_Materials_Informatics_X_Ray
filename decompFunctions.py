@@ -50,7 +50,7 @@ def getKmeansClusters(data, nClusters,**kwargs):
         ax.axis('off')
     return pltData, k_means
     
-def doPCA(data, nComponents, xvals = [], xlabel = '', **kwargs):
+def doPCA(data, nComponents, xvals = [], xlabel = '',normalize = False, returnComponents = -1, **kwargs):
     '''
     Does probabilistic PCA on data.
     
@@ -67,21 +67,39 @@ def doPCA(data, nComponents, xvals = [], xlabel = '', **kwargs):
     projected data, eigenvectors, list of explained variance ratio, PCA estimator object.
     
     '''
-    pca = decomposition.PCA(whiten = False, n_components = nComponents)
+    
+    if normalize == True:
+        #Find the Mean
+        meanvect = np.mean(data, axis = 0)
+        #Normalize Data
+        data = np.subtract(data,meanvect)
+        
+    if returnComponents < 0:
+        returnComponents = nComponents
+    
+    print data[0,0]
+    
+    pca = decomposition.PCA(whiten = False, n_components = returnComponents)
     eigenVals = pca.fit_transform(data)
     comps = pca.components_
     size = int(np.sqrt(comps.shape[-1]))
     pltData = comps.reshape(-1,size,size)
     varRatio = pca.explained_variance_ratio_
     fig, axes = plt.subplots(nComponents/2,2+nComponents%2, figsize = (12,12))
-    fig.subplots_adjust(wspace=0.1, hspace=0.1,bottom = 0., top=0.5)
+    #ig.subplots_adjust(wspace=0.1, hspace=0.1,bottom = 0., top=0.5)
+    
 #     fig.subplots_adjust(left=-0.01, bottom=-0.01, right=0.01, top=0.01,
 #                     wspace=0.01, hspace=0.01)
     for ax, imp, nComp in zip(axes.flat, pltData, np.arange(nComponents)):
-        ax.imshow(imp, **kwargs)
+        im = ax.imshow(imp, **kwargs)
         label = 'Component = %d' %(nComp+1)
         ax.axis('off')
         ax.set_title(label)
+        
+    fig.subplots_adjust(right=0.8)
+    cbar_ax = fig.add_axes([0.85, 0.15, 0.05, 0.7])
+    cbar = fig.colorbar(im, cax=cbar_ax)
+   
     fig, axes = plt.subplots(nComponents/2,2+nComponents%2, figsize = (12,12),sharex = True, sharey = False)
     fig.subplots_adjust(hspace=0.3)
     for ax, nComp, ratio in zip(axes.flat, np.arange(nComponents), varRatio):
@@ -89,6 +107,7 @@ def doPCA(data, nComponents, xvals = [], xlabel = '', **kwargs):
             ax.plot(xvals[:], eigenVals[:,nComp],marker='o',markerfacecolor='r')
         else:
             ax.plot(eigenVals[:,nComp],marker='o',markerfacecolor='r')
+            
         label = 'Component = %d, Exp. Var. Ratio = %2.3f  ' %(nComp+1, ratio)
         ax.set_title(label)
         ax.set_xlabel(xlabel)
