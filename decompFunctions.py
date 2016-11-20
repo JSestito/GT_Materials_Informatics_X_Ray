@@ -85,6 +85,17 @@ def doPCA(data, nComponents, xvals = [], xlabel = '',normalize = False, returnCo
     size = int(np.sqrt(comps.shape[-1]))
     pltData = comps.reshape(-1,size,size)
     varRatio = pca.explained_variance_ratio_
+    
+    if normalize == True:
+        meandata = meanvect.reshape(-1,size,size)
+        fig,ax = plt.subplots()
+        cax = ax.imshow(meandata[0,:,:])
+        cbar = fig.colorbar(cax)
+        cbar.set_label('Intensity (Out of 2^16)')
+        ax.set_xlabel('x position')
+        ax.set_ylabel('y position')
+        ax.set_title('Mean')
+    
     fig, axes = plt.subplots(nComponents/2,2+nComponents%2, figsize = (12,12))
     #ig.subplots_adjust(wspace=0.1, hspace=0.1,bottom = 0., top=0.5)
     
