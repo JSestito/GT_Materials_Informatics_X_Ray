@@ -51,7 +51,7 @@ def getKmeansClusters(data, nClusters,**kwargs):
         ax.axis('off')
     return pltData, k_means
     
-def doPCA(data, nComponents, mask = [], xvals = [], xlabel = '',normalize = False, returnComponents = -1, **kwargs):
+def doPCA(data, nComponents, plot = True, xvals = [], xlabel = '',normalize = False, returnComponents = -1, **kwargs):
     '''
     Does probabilistic PCA on data.
     
@@ -69,10 +69,6 @@ def doPCA(data, nComponents, mask = [], xvals = [], xlabel = '',normalize = Fals
     
     '''
 
-    if mask != []:
-        mask_prep = preping(mask, logscaling = False, feature_scaling=False, feature_range=(0.1,1))
-        data = ma.masked_array(data,mask_prep)    
-
     if normalize == True:
         #Find the Mean
         meanvect = np.mean(data, axis = 1)
@@ -88,45 +84,48 @@ def doPCA(data, nComponents, mask = [], xvals = [], xlabel = '',normalize = Fals
                                           
     comps = pca.components_
     size = int(np.sqrt(comps.shape[-1]))
-    pltData = comps.reshape(-1,size,size)
+    
+    if plot == True:
+        pltData = comps.reshape(-1,size,size)
+    else:
+        pltData = comps
+    
     varRatio = pca.explained_variance_ratio_
     
-    if mask != []:
-        pltData = ma.masked_array(pltData,mask)
+    if plot == True:
+        if normalize == True:
+            fig,ax = plt.subplots()
+            ax.set_title('Mean')
+            ax.plot(xvals,meanvect,marker = 'o', markerfacecolor='r')
+            ax.set_xlabel('$2\\theta$ (deg.)')
+            ax.set_ylabel('(Intensity) $ (arb. units)')
     
-    if normalize == True:
-        fig,ax = plt.subplots()
-        ax.set_title('Mean')
-        ax.plot(xvals,meanvect,marker = 'o', markerfacecolor='r')
-        ax.set_xlabel('$2\\theta$ (deg.)')
-        ax.set_ylabel('(Intensity) $ (arb. units)')
-    
-    fig, axes = plt.subplots(nComponents/2,2+nComponents%2, figsize = (12,12))
+        fig, axes = plt.subplots(nComponents/2,2+nComponents%2, figsize = (12,12))
     #ig.subplots_adjust(wspace=0.1, hspace=0.1,bottom = 0., top=0.5)
     
 #     fig.subplots_adjust(left=-0.01, bottom=-0.01, right=0.01, top=0.01,
 #                     wspace=0.01, hspace=0.01)
-    for ax, imp, nComp in zip(axes.flat, pltData, np.arange(nComponents)):
-        im = ax.imshow(imp, **kwargs)
-        label = 'Component = %d' %(nComp+1)
-        ax.axis('off')
-        ax.set_title(label)
+        for ax, imp, nComp in zip(axes.flat, pltData, np.arange(nComponents)):
+            im = ax.imshow(imp, **kwargs)
+            label = 'Component = %d' %(nComp+1)
+            ax.axis('off')
+            ax.set_title(label)
         
-    fig.subplots_adjust(right=0.8)
-    cbar_ax = fig.add_axes([0.85, 0.15, 0.05, 0.7])
-    cbar = fig.colorbar(im, cax=cbar_ax)
+        fig.subplots_adjust(right=0.8)
+        cbar_ax = fig.add_axes([0.85, 0.15, 0.05, 0.7])
+        cbar = fig.colorbar(im, cax=cbar_ax)
    
-    fig, axes = plt.subplots(nComponents/2,2+nComponents%2, figsize = (12,12),sharex = True, sharey = False)
-    fig.subplots_adjust(hspace=0.3)
-    for ax, nComp, ratio in zip(axes.flat, np.arange(nComponents), varRatio):
-        if len(xvals) is not 0:
-            ax.plot(xvals[:], eigenVals[:,nComp],marker='o',markerfacecolor='r')
-        else:
-            ax.plot(eigenVals[:,nComp],marker='o',markerfacecolor='r')
+        fig, axes = plt.subplots(nComponents/2,2+nComponents%2, figsize = (12,12),sharex = True, sharey = False)
+        fig.subplots_adjust(hspace=0.3)
+        for ax, nComp, ratio in zip(axes.flat, np.arange(nComponents), varRatio):
+            if len(xvals) is not 0:
+                ax.plot(xvals[:], eigenVals[:,nComp],marker='o',markerfacecolor='r')
+            else:
+                ax.plot(eigenVals[:,nComp],marker='o',markerfacecolor='r')
             
-        label = 'Component = %d, Exp. Var. Ratio = %2.3f  ' %(nComp+1, ratio)
-        ax.set_title(label)
-        ax.set_xlabel(xlabel)
+            label = 'Component = %d, Exp. Var. Ratio = %2.3f  ' %(nComp+1, ratio)
+            ax.set_title(label)
+            ax.set_xlabel(xlabel)
         
     return np.array(pltData), np.array(eigenVals), np.array(varRatio), pca
     
@@ -153,6 +152,7 @@ def doNMF(data, nComponents,  xvals = [], xlabel='', **kwargs):
     comps = nmf.components_
     size = int(np.sqrt(comps.shape[-1]))
     pltData = comps.reshape(-1,size,size)
+      
     fig, axes = plt.subplots(nComponents/2,2+nComponents%2, figsize = (12,12))
     #fig.subplots_adjust(wspace=0.1, hspace=0.01,bottom = 0., top=0.5)
 #     fig.subplots_adjust(left=-0.01, bottom=-0.01, right=0.01, top=0.01,
@@ -162,9 +162,6 @@ def doNMF(data, nComponents,  xvals = [], xlabel='', **kwargs):
         label = 'Component = %d' %(nComp+1)
         ax.axis('off')
         ax.set_title(label)
-    fig.subplots_adjust(right=0.8)
-    cbar_ax = fig.add_axes([0.85, 0.15, 0.05, 0.7])
-    cbar = fig.colorbar(im, cax=cbar_ax)
     plt.show()
     fig, axes = plt.subplots(nComponents/2,2+nComponents%2, sharex = True, sharey = False, figsize = (12,12))
     fig.subplots_adjust(hspace=0.3)
@@ -234,7 +231,7 @@ def doPCA_Mask(data, nComponents, mask3D, xvals = [], xlabel = '',normalize = Tr
     mask = preping(mask3D, logscaling = False, feature_scaling=False, feature_range=(0.1,1))
     
     
-    data_mask = np.zeros((mask.shape[0],int(np.sum(mask[0,:]))))
+    data_mask = np.zeros((mask.shape[0],int(mask.shape[1] - np.sum(mask[0,:]))))
     
     j = 0
     for i in range(0,mask.shape[1]):
@@ -297,4 +294,4 @@ def doPCA_Mask(data, nComponents, mask3D, xvals = [], xlabel = '',normalize = Tr
         ax.set_title(label)
         ax.set_xlabel(xlabel)
         
-    return np.array(comps), np.array(eigenVals), np.array(varRatio), pca
+    return np.array(pltData), np.array(eigenVals), np.array(varRatio), pca
